@@ -22,6 +22,16 @@ export default class ItemManager extends LitElement {
       justify-content: center;
     }
 
+    @media print {
+      h2 {
+        display: none;
+      }
+
+      button {
+        display: none;
+      }
+    }
+
   `;
 
   itemsTask = new Task(

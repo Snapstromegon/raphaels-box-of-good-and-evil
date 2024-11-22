@@ -79,9 +79,29 @@ export default class ItemCard extends LitElement {
       border-radius: 0.5rem;
       overflow: hidden;
       padding: 5mm;
+      page-break-inside: avoid;
       & markdown-box {
         mix-blend-mode: multiply;
         text-align: center;
+      }
+    }
+    @media print {
+      #edit,
+      #delete {
+        display: none !important;
+      }
+
+      h2 {
+        display: none;
+      }
+
+      .card {
+        border: 1px solid #000;
+      }
+
+      #wrapper {
+        padding: 0;
+        background: none;
       }
     }
   `;
