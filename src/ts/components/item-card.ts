@@ -1,7 +1,21 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { deleteItem, Item } from "../storage.js";
+import { deleteItem, Item, itemCategoryDE, itemRarityDE } from "../storage.js";
 import "./markdown-box.js";
+import { classMap } from "lit/directives/class-map.js";
+
+const categoryIcon = {
+  "": "",
+  armor: "security",
+  magic_sticks: "ink_marker",
+  magical_object: "emoji_objects",
+  potion: "air_freshner",
+  ring: "circles",
+  scepter: "man_4",
+  scroll: "contract",
+  wand: "wounds_injury",
+  weapon: "swords",
+};
 
 @customElement("item-card")
 export default class ItemCard extends LitElement {
@@ -26,6 +40,22 @@ export default class ItemCard extends LitElement {
       padding: 1rem;
       background: #333;
       border-radius: 0.5rem;
+
+      &.uncommon .card {
+        border-color: #51a72e;
+      }
+
+      &.rare .card {
+        border-color: #156082;
+      }
+
+      &.very_rare .card {
+        border-color: #a02b93;
+      }
+
+      &.legendary .card {
+        border-color: #e97132;
+      }
     }
 
     h2 {
@@ -37,6 +67,8 @@ export default class ItemCard extends LitElement {
 
     #front {
       grid-area: front;
+      display: grid;
+      grid-template-rows: 1fr auto;
     }
 
     #back {
@@ -74,15 +106,34 @@ export default class ItemCard extends LitElement {
       background: url("./assets/paper-texture.png");
       display: flex;
       flex-direction: column;
-      align-items: center;
-      place-content: center;
       border-radius: 0.5rem;
       overflow: hidden;
-      padding: 5mm;
+      padding: 2mm;
       page-break-inside: avoid;
+      border: 2mm solid #aaa;
+      place-content: center;
       & markdown-box {
         mix-blend-mode: multiply;
         text-align: center;
+      }
+
+      footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+        flex-wrap: wrap-reverse;
+        & img {
+          height: 16px;
+        }
+
+        & span {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
       }
     }
     @media print {
@@ -96,7 +147,7 @@ export default class ItemCard extends LitElement {
       }
 
       .card {
-        border: 1px solid #000;
+        border: 2mm solid #000;
       }
 
       #wrapper {
@@ -112,7 +163,12 @@ export default class ItemCard extends LitElement {
   override render() {
     console.log("item:", this.item);
     return html`
-      <div id="wrapper">
+      <div
+        id="wrapper"
+        class=${classMap({
+          [this.item?.rarity || "common"]: true,
+        })}
+      >
         <h2>${this.item?.name}</h2>
         <button id="delete" @click=${this.delete}>
           <svg
@@ -140,6 +196,24 @@ export default class ItemCard extends LitElement {
         </button>
         <div class="card" id="front">
           <markdown-box markdown=${this.item?.frontMd || ""}></markdown-box>
+          <footer>
+            <span>
+              ${this.item?.category
+                ? html`<img
+                    id="category"
+                    src="${"assets/icons/" +
+                    categoryIcon[this.item?.category || ""] +
+                    ".svg"}"
+                    style="fill: #f00;"
+                  />`
+                : ""}
+              ${itemCategoryDE[this.item?.category || ""]}
+            </span>
+            <span>${itemRarityDE[this.item?.rarity || "common"]}</span>
+            ${this.item?.needsAttunement
+              ? html`<span id="attunement">Einstimmung</span>`
+              : ""}
+          </footer>
         </div>
         <div class="card" id="back">
           <markdown-box markdown=${this.item?.backMd || ""}></markdown-box>

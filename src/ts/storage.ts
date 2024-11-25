@@ -1,7 +1,50 @@
+export type ItemRarity =
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "very_rare"
+  | "legendary";
+
+export const itemRarityDE = {
+  common: "Gewöhnlich",
+  uncommon: "Ungewöhnlich",
+  rare: "Selten",
+  very_rare: "Sehr Selten",
+  legendary: "Legendär",
+};
+
+export type ItemCategory =
+  | ""
+  | "armor"
+  | "magic_sticks"
+  | "magical_object"
+  | "potion"
+  | "ring"
+  | "scepter"
+  | "scroll"
+  | "wand"
+  | "weapon";
+
+export const itemCategoryDE = {
+  "": "",
+  armor: "Rüstung",
+  ring: "Ring",
+  scroll: "Schriftrolle",
+  potion: "Trank",
+  weapon: "Waffe",
+  magical_object: "Wundersamer Gegenstand",
+  wand: "Zauberstab",
+  magic_sticks: "Zauberstecken",
+  scepter: "Zepter",
+};
+
 export type Item = {
   name: string;
   frontMd: string;
   backMd: string;
+  needsAttunement: boolean;
+  rarity: ItemRarity;
+  category: ItemCategory;
 };
 
 export type Items = { [Key: string]: Item };
@@ -29,7 +72,13 @@ export const loadItems = async (): Promise<Items> => {
   const fs = await getFilesystem();
   try {
     const file = await fs.getFileHandle("items.json");
-    return JSON.parse(await (await file.getFile()).text());
+    const parsedFile: Object = JSON.parse(await (await file.getFile()).text());
+    for (const item of Object.values(parsedFile)) {
+      item.needsAttunement = item.needsAttunement ?? false;
+      item.rarity = item.rarity ?? "Gewöhnlich";
+      item.category = item.category ?? "";
+    }
+    return parsedFile as Items;
   } catch {
     return {};
   }

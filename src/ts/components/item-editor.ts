@@ -1,10 +1,19 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
-import { deleteItem, Item, saveItem } from "../storage.js";
+import {
+  deleteItem,
+  Item,
+  ItemCategory,
+  itemCategoryDE,
+  ItemRarity,
+  itemRarityDE,
+  saveItem,
+} from "../storage.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import "./markdown-box.js";
 import "./item-card.js";
 import "./image-selector.js";
+import { repeat } from "lit/directives/repeat.js";
 
 @customElement("item-editor")
 export default class ItemEditor extends LitElement {
@@ -50,18 +59,67 @@ export default class ItemEditor extends LitElement {
   @query("#name")
   name!: HTMLInputElement;
 
+  @query("#needsAttunement")
+  needsAttunement!: HTMLInputElement;
+
+  @query("#rarity")
+  rarity!: HTMLSelectElement;
+
+  @query("#category")
+  category!: HTMLSelectElement;
+
   @state()
   selectedImage?: string;
 
   override render() {
     return html`
       <button @click=${this.close}>Schließen</button>
+      <br />
       <input
         id="name"
         type="text"
         .value=${this.item?.name || ""}
         @input=${this.rename}
-      />
+        placeholder="Name"
+      /><br />
+      <label
+        >Einstimmung:
+        <input
+          @input=${this.liveUpdate}
+          type="checkbox"
+          id="needsAttunement"
+          ?checked=${this.item?.needsAttunement}
+      /></label>
+      <label
+        >Seltenheit:
+        <select @change=${this.liveUpdate} id="rarity">
+          ${repeat(
+            Object.entries(itemRarityDE),
+            ([name]) => name,
+            ([name, translation]) => html` <option
+              ?selected=${this.item?.rarity == name}
+              value=${name}
+            >
+              ${translation}
+            </option>`
+          )}
+        </select></label
+      >
+      <label
+        >Kategorie:
+        <select @change=${this.liveUpdate} id="category">
+          ${repeat(
+            Object.entries(itemCategoryDE),
+            ([name]) => name,
+            ([name, translation]) => html` <option
+              ?selected=${this.item?.category == name}
+              value=${name}
+            >
+              ${translation}
+            </option>`
+          )}
+        </select></label
+      >
       <div id="wrapper">
         <textarea
           id="frontmd"
@@ -97,6 +155,9 @@ ${this.item?.backMd}</textarea
   async liveUpdate() {
     this.item!.frontMd = this.frontMd.value;
     this.item!.backMd = this.backMd.value;
+    this.item!.category = this.category.value as ItemCategory;
+    this.item!.rarity = this.rarity.value as ItemRarity;
+    this.item!.needsAttunement = this.needsAttunement.checked;
     this.item = { ...this.item! };
     await saveItem(this.item!);
   }
