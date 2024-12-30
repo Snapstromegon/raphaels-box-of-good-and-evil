@@ -147,7 +147,9 @@ export default class ItemCard extends LitElement {
       }
 
       .card {
-        border: 2mm solid #000;
+        & markdown-box {
+          mix-blend-mode: normal;
+        }
       }
 
       #wrapper {
