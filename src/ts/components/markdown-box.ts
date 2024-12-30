@@ -11,7 +11,7 @@ export default class MarkdownBox extends LitElement {
   static override styles = css`
     img {
       width: 80%;
-      max-height: 5cm;
+      max-height: 4cm;
       object-fit: contain;
     }
   `;

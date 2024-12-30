@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { deleteItem, Item, itemCategoryDE, itemRarityDE } from "../storage.js";
+import { deleteItem, Item, itemCategoryDE, itemRarityDE, saveItem } from "../storage.js";
 import "./markdown-box.js";
 import { classMap } from "lit/directives/class-map.js";
 
@@ -33,10 +33,10 @@ export default class ItemCard extends LitElement {
 
     #wrapper {
       display: grid;
-      grid-template-columns: 1fr 1fr auto auto;
+      grid-template-columns: 1fr 1fr auto auto auto;
       grid-template-rows: auto auto;
       gap: 0.5rem;
-      grid-template-areas: "name name delete edit" "front back back back";
+      grid-template-areas: "name name printCount delete edit" "front back back back back";
       padding: 1rem;
       background: #333;
       border-radius: 0.5rem;
@@ -73,6 +73,10 @@ export default class ItemCard extends LitElement {
 
     #back {
       grid-area: back;
+    }
+
+    #printCount {
+      grid-area: printCount;
     }
 
     #edit {
@@ -137,6 +141,7 @@ export default class ItemCard extends LitElement {
       }
     }
     @media print {
+      #printCount,
       #edit,
       #delete {
         display: none !important;
@@ -147,6 +152,7 @@ export default class ItemCard extends LitElement {
       }
 
       .card {
+        border-radius: 0;
         & markdown-box {
           mix-blend-mode: normal;
         }
@@ -155,6 +161,8 @@ export default class ItemCard extends LitElement {
       #wrapper {
         padding: 0;
         background: none;
+        gap: 0;
+        grid-template-columns: 1fr 1fr 1fr;
       }
     }
   `;
@@ -163,7 +171,7 @@ export default class ItemCard extends LitElement {
   @property({ type: Boolean }) controls = false;
 
   override render() {
-    console.log("item:", this.item);
+    // console.log("item:", this.item);
     return html`
       <div
         id="wrapper"
@@ -172,6 +180,7 @@ export default class ItemCard extends LitElement {
         })}
       >
         <h2>${this.item?.name}</h2>
+        <input type="number" id="printCount" value=${this.item?.printCount ?? 1} @input=${this.updatePrintCount} min=0 max=64 />
         <button id="delete" @click=${this.delete}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -233,5 +242,13 @@ export default class ItemCard extends LitElement {
 
   async edit() {
     this.dispatchEvent(new CustomEvent("edit", { detail: this.item }));
+  }
+
+  async updatePrintCount(e: InputEvent) {
+    if (this.item) {
+      this.item.printCount = Number((e.target as HTMLInputElement).value);
+      await saveItem(this.item);
+      this.dispatchEvent(new CustomEvent("updatePrintCount", { detail: this.item }));
+    }
   }
 }

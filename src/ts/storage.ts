@@ -45,6 +45,7 @@ export type Item = {
   needsAttunement: boolean;
   rarity: ItemRarity;
   category: ItemCategory;
+  printCount?: number;
 };
 
 export type Items = { [Key: string]: Item };
